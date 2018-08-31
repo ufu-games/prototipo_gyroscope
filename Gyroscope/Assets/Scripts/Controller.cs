@@ -13,13 +13,16 @@ public class Controller : MonoBehaviour {
 	[SerializeField]
 	private float m_currentVelocity = 0f;
 	private float m_maxVelocity = 5f;
+	private float m_maxBoosterVelocity = 10f;
 	[SerializeField]
 	private float m_turnAmount = 20f;
 
 	private Rigidbody2D m_rigidbody;
+	private CameraFollow m_cameraFollow;
 
 	void Start () {
 		m_rigidbody = GetComponent<Rigidbody2D>();
+		m_cameraFollow = FindObjectOfType<CameraFollow>();
 
 		#if UNITY_ANDROID
 		Input.gyro.enabled = true;
@@ -48,10 +51,12 @@ public class Controller : MonoBehaviour {
 		if(velocityText) velocityText.text = ("velocidade: " + m_currentVelocity);
 
 		transform.localEulerAngles = new Vector3(transform.localEulerAngles.x, transform.localEulerAngles.y, angleZ);
+
 		m_rigidbody.velocity = transform.up * m_currentVelocity;
+		m_cameraFollow.UpdateOrtographicSize(m_currentVelocity, m_maxBoosterVelocity);
 	}
 
-	private IEnumerator Accelerate(float startSpeed, float aimSpeed, float timeToMove = 0.2f) {
+	private IEnumerator Accelerate(float startSpeed, float aimSpeed, float timeToMove = 0.5f) {
 		float elapsedTime = 0.0f;
 		bool reachedVelocity = false;
 
