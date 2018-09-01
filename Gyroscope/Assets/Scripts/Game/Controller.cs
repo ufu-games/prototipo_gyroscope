@@ -58,8 +58,6 @@ public class Controller : MonoBehaviour {
 	}
 
 	private IEnumerator Accelerate(float startSpeed, float aimSpeed, float timeToMove = 0.5f) {
-		m_isAccelerating = true;
-
 		float elapsedTime = 0.0f;
 		bool reachedVelocity = false;
 
@@ -76,7 +74,6 @@ public class Controller : MonoBehaviour {
 			yield return null;
 		}
 
-		m_isAccelerating = false;
 	}
 
 	public void StartMovement() {
@@ -85,16 +82,15 @@ public class Controller : MonoBehaviour {
 
 
 	private IEnumerator BoostVelocityRoutine() {
-		StartCoroutine(Accelerate(m_currentVelocity, m_maxBoosterVelocity, 0.2f));
-		yield return new WaitForSeconds(2f);
-		StartCoroutine(Accelerate(m_currentVelocity, m_maxVelocity, 2f));
+		StartCoroutine(Accelerate(m_currentVelocity, m_maxBoosterVelocity, 0.5f));
+		yield return new WaitForSeconds(1.5f);
+		StartCoroutine(Accelerate(m_currentVelocity, m_maxVelocity, 1.5f));
 	}
 
 
 	private void BoostVelocity() {
-		if(!m_isAccelerating) {
-			StartCoroutine(BoostVelocityRoutine());
-		} 
+		StopAllCoroutines();
+		StartCoroutine(BoostVelocityRoutine());
 	}
 
 	void OnTriggerEnter2D(Collider2D other) {
