@@ -14,6 +14,7 @@ public class Controller : MonoBehaviour {
 	private float m_currentVelocity = 0f;
 	private float m_maxVelocity = 5f;
 	private float m_maxBoosterVelocity = 10f;
+	private bool m_isAccelerating = false;
 	[SerializeField]
 	private float m_turnAmount = 20f;
 
@@ -57,11 +58,13 @@ public class Controller : MonoBehaviour {
 	}
 
 	private IEnumerator Accelerate(float startSpeed, float aimSpeed, float timeToMove = 0.5f) {
+		m_isAccelerating = true;
+
 		float elapsedTime = 0.0f;
 		bool reachedVelocity = false;
 
 		while(!reachedVelocity) {
-			if(aimSpeed - m_currentVelocity < 0.1f) {
+			if(Mathf.Abs(aimSpeed - m_currentVelocity) < 0.1f) {
 				reachedVelocity = true;
 				m_currentVelocity = aimSpeed;
 			}
@@ -72,9 +75,31 @@ public class Controller : MonoBehaviour {
 
 			yield return null;
 		}
+
+		m_isAccelerating = false;
 	}
 
 	public void StartMovement() {
 		StartCoroutine(Accelerate(0f, m_maxVelocity));
+	}
+
+
+	private IEnumerator BoostVelocityRoutine() {
+		StartCoroutine(Accelerate(m_currentVelocity, m_maxBoosterVelocity, 0.2f));
+		yield return new WaitForSeconds(2f);
+		StartCoroutine(Accelerate(m_currentVelocity, m_maxVelocity, 2f));
+	}
+
+
+	private void BoostVelocity() {
+		if(!m_isAccelerating) {
+			StartCoroutine(BoostVelocityRoutine());
+		} 
+	}
+
+	void OnTriggerEnter2D(Collider2D other) {
+		if(other.tag == "Booster") {
+			BoostVelocity();
+		}
 	}
 }
