@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class CameraFollow : MonoBehaviour {
 
-	private float m_originalOrtographicSize = 5f;
-	private float m_maxOrtographicSize = 7f;
+	private float m_originalOrtographicSize = 2f;
+	private float m_maxOrtographicSize = 4f;
 
 	/*
 		Ideia:

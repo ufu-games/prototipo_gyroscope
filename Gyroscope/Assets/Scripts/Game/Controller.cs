@@ -19,11 +19,15 @@ public class Controller : MonoBehaviour {
 	private float m_turnAmount = 20f;
 
 	private Rigidbody2D m_rigidbody;
+	private AudioSource m_audioSource;
 	private CameraFollow m_cameraFollow;
 
 	void Start () {
 		m_rigidbody = GetComponent<Rigidbody2D>();
+		m_audioSource = GetComponent<AudioSource>();
 		m_cameraFollow = FindObjectOfType<CameraFollow>();
+
+		m_audioSource.volume = 0;
 
 		#if UNITY_ANDROID
 		Input.gyro.enabled = true;
@@ -76,15 +80,39 @@ public class Controller : MonoBehaviour {
 
 	}
 
+	private IEnumerator IncreaseVolume(float start, float end) {
+		m_audioSource.volume = start;
+		float elapsedTime = 0.0f;
+		bool reached = false;
+
+		while(!reached) {
+			if(Mathf.Abs(m_audioSource.volume - end) < 0.1f) {
+				reached = true;
+				m_audioSource.volume = end;
+				break;
+			}
+
+			elapsedTime += Time.deltaTime;
+			float t = Interpolation.EaseIn(Mathf.Clamp(elapsedTime, 0f, 1f));
+			m_audioSource.volume = t;
+
+			yield return null;
+		}
+	}
+
 	public void StartMovement() {
+		m_audioSource.Play();
 		StartCoroutine(Accelerate(0f, m_maxVelocity));
+		StartCoroutine(IncreaseVolume(0, 1f));
 	}
 
 
 	private IEnumerator BoostVelocityRoutine() {
 		StartCoroutine(Accelerate(m_currentVelocity, m_maxBoosterVelocity, 0.5f));
+		StartCoroutine(IncreaseVolume(1f, 1.5f));
 		yield return new WaitForSeconds(1.5f);
 		StartCoroutine(Accelerate(m_currentVelocity, m_maxVelocity, 1.5f));
+		StartCoroutine(IncreaseVolume(1.5f, 1f));
 	}
 
 
